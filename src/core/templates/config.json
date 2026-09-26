@@ -1,0 +1,30 @@
+{
+  "$schema_note": "Behavior preferences, read deterministically by code/gates (decision #42). EVERY field here has a reader in src/ — a field nobody reads is a lie the file tells about itself, so it does not belong (REQ-110). Descriptive project context lives in SPEC/KEEL, never here. The 'commands' section is written by /arch (mirrored from KEEL.md) and read by the hook scripts. Gate policy is not configurable and never comes from track: decisions pause only when their content needs human authority; deterministic proof follows the delivery contract. The YOLO mandate may carry eligible decisions without weakening proof and lives only in local .helmit/yolo.json (REQ-118), never in this versioned file.",
+  "helmit_version": "0.0.2",
+  "language": "en",
+  "artifact_language": "en",
+  "track": "standard",
+  "ship": {
+    "create_pr": false
+  },
+  "commands": {
+    "test": "",
+    "build": "",
+    "lint": "",
+    "format": ""
+  },
+  "model_profiles": {
+    "discovery": "fast",
+    "plan": "default",
+    "implement": "default",
+    "verify": "fast"
+  },
+  "$enums": {
+    "language": "any BCP-47 tag, e.g. en, pt-BR — user-facing messages follow it; artifacts stay in English",
+    "artifact_language": "BCP-47 tag for the PROSE of the user's artifacts (SPEC/ROADMAP/CHART/VALIDATION). Structural keys, field names and enum values (status:, covers:, workflow states) stay English (machine-read), and KEEL.md is ALWAYS English — it is agent-facing. Defaults to language; the /setup wizard persists both",
+    "track": "micro | standard | full — legacy descriptive project context retained for compatible readers; it never selects workflow steps, approvals, or proof",
+    "commands.format": "optional auto-format command run by the PostToolUse hook after edits; PREFER the {file} placeholder for the edited file (e.g. \"prettier --write {file}\"). A project-wide command (e.g. \"prettier --write .\") would rewrite .helmit/ on every edit, so the hook SKIPS it — with one warning — unless .helmit/ is excluded from the formatter (helmit:format-ignore block) or commands.format_guard says otherwise. Never a gate",
+    "commands.format_guard": "optional escape hatch, values: auto (default — the hook detects the exclusion in the known ignore files: .prettierignore/.eslintignore/.stylelintignore/.biomeignore, pyproject.toml/ruff.toml/setup.cfg, eslint flat config, biome.json) | declared (you assert .helmit/ is out of the formatter's reach by a mechanism HelmIt cannot see)",
+    "model_profiles": "ABSTRACT model tiers per task type: fast | default. The adapter maps tiers to real models (platforms run different model families) — never put a model name here. Used only when optional delegation is chosen; ignored until the adapter supports it"
+  }
+}

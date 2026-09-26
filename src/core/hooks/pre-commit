@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# helmit-pre-commit — HelmIt deterministic quick floor, layer 2.
+# helmit-pre-commit-version: 0.0.91
+# Installed into .git/hooks/pre-commit by /helmit:setup; removed by
+# /helmit:uninstall (it looks for the 'helmit-pre-commit' marker above).
+# This copied floor is self-contained. Product test/build/lint commands belong
+# to wave/validate/ship boundaries and are never executed here.
+
+set -u
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+[ -f "$ROOT/.helmit/config.json" ] || exit 0
+
+if ! git -C "$ROOT" diff --cached --check; then
+  echo "helmit quick floor: staged diff check FAILED — commit blocked." >&2
+  exit 1
+fi
+
+PY_BIN=""
+if [ -n "${HELMIT_PYTHON:-}" ]; then PY_BIN="$HELMIT_PYTHON"; else
+  for cand in python3 python py; do
+    if command -v "$cand" >/dev/null 2>&1; then PY_BIN="$cand"; break; fi
+  done
+fi
+if [ -z "$PY_BIN" ] || ! command -v "$PY_BIN" >/dev/null 2>&1; then
+  echo "WARNING: HelmIt quick floor PARTIAL — no python interpreter; staged Python/JSON/shell syntax was not checked." >&2
+  exit 0
+fi
+
+"$PY_BIN" - "$ROOT" <<'PY'
+import json, subprocess, sys
+root = sys.argv[1]
+listed = subprocess.run(["git", "-C", root, "diff", "--cached", "--name-only", "-z", "--diff-filter=ACMR"], capture_output=True)
+problems = []
+for raw in listed.stdout.split(b"\0"):
+    if not raw: continue
+    path = raw.decode("utf-8", "surrogateescape")
+    blob = subprocess.run(["git", "-C", root, "show", ":" + path], capture_output=True)
+    if blob.returncode != 0: continue
+    try:
+        if path.endswith(".py"):
+            compile(blob.stdout.decode("utf-8"), path, "exec")
+        elif path.endswith(".json"):
+            json.loads(blob.stdout.decode("utf-8"))
+        elif path.endswith(".sh") or path.endswith("/pre-commit"):
+            parsed = subprocess.run(["bash", "-n"], input=blob.stdout, capture_output=True)
+            if parsed.returncode: problems.append("%s: %s" % (path, parsed.stderr.decode("utf-8", "replace").strip()))
+    except (SyntaxError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        problems.append("%s: %s" % (path, exc))
+if problems:
+    print("helmit quick floor: staged syntax FAILED — commit blocked.", file=sys.stderr)
+    for problem in problems[:40]: print(problem, file=sys.stderr)
+    raise SystemExit(1)
+PY

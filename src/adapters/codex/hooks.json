@@ -1,0 +1,102 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/session-start.sh",
+            "statusMessage": "HelmIt session start: restoring handoff and heartbeat mandate",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/session-activity.sh start",
+            "statusMessage": "HelmIt session activity: recording a recent host event",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/commit-gate.sh",
+            "statusMessage": "HelmIt commit gate: running test/build/lint before commit",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/executor-lease.sh renew",
+            "statusMessage": "HelmIt executor lease: recording interactive task activity",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/session-activity.sh edit",
+            "statusMessage": "HelmIt session activity: recording an edit",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/auto-format.sh",
+            "statusMessage": "HelmIt auto-format: formatting edited files",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/inbox-receipt.sh",
+            "statusMessage": "HelmIt INBOX receipt: validating the written INBOX",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/executor-lease.sh renew --activity",
+            "statusMessage": "HelmIt executor lease: recording interactive task activity",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/session-activity.sh bash",
+            "statusMessage": "HelmIt session activity: recording a command",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/metrics-collect.sh",
+            "statusMessage": "HelmIt metrics: recording commit token usage",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT}\"/core/hooks/metrics-collect.sh",
+            "statusMessage": "HelmIt metrics: recording session token usage",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

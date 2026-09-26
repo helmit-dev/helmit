@@ -1,0 +1,23 @@
+{
+  "name": "helmit",
+  "displayName": "HelmIt",
+  "version": "0.0.91",
+  "description": "HelmIt — a lean harness for agentic development that adopts Spec-Driven Development as its working discipline. Guided, gated, cross-platform.",
+  "author": {
+    "name": "Alessandro Varela"
+  },
+  "license": "MIT",
+  "homepage": "https://helmit.dev",
+  "repository": "https://github.com/helmit-dev/helmit",
+  "keywords": [
+    "claude-code",
+    "codex",
+    "plugin",
+    "sdd",
+    "spec-driven-development",
+    "harness",
+    "agentic-development"
+  ],
+  "skills": "./core/skills",
+  "hooks": "./adapters/claude-code/hooks.json"
+}

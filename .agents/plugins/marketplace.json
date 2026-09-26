@@ -1,0 +1,33 @@
+{
+  "name": "helmit",
+  "owner": {
+    "name": "Alessandro Varela"
+  },
+  "metadata": {
+    "description": "HelmIt plugin marketplace for Codex — install with: codex plugin marketplace add helmit-dev/helmit"
+  },
+  "plugins": [
+    {
+      "name": "helmit",
+      "displayName": "HelmIt",
+      "source": {
+        "source": "local",
+        "path": "./src"
+      },
+      "description": "A lean harness for agentic development that adopts Spec-Driven Development as its working discipline. Guided (/helmit:next), gated (deterministic commit gate), cross-platform.",
+      "category": "workflow",
+      "license": "MIT",
+      "homepage": "https://helmit.dev",
+      "repository": "https://github.com/helmit-dev/helmit",
+      "keywords": [
+        "claude-code",
+        "codex",
+        "plugin",
+        "sdd",
+        "spec-driven-development",
+        "harness",
+        "agentic-development"
+      ]
+    }
+  ]
+}
